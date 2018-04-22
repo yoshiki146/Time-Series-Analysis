@@ -1,0 +1,27 @@
+### Problem 6
+First, I import the data directly from FRED using `getSymbols` function of [quantmod](https://cran.r-project.org/web/packages/quantmod/quantmod.pdf)
+
+```{r}
+library(quantmod)
+
+getSymbols('T10Y3MM',src='FRED') # monthly observation from 1982-01-01 to 2018-03-01
+T10Y3MM= T10Y3MM['/2017-12-01'] # select end period
+
+head(T10Y3MM) # show head
+tail(T10Y3MM) # show tail
+```
+
+```{r}
+plot(T10Y3MM)
+
+
+T10Y3MM=as.data.frame(T10Y3MM)
+date=rownames(T10Y3MM)
+treasury=data_frame(date,T10=T10Y3MM$T10Y3MM)
+ggplot(treasury, aes(x=date, y=T10))+
+  geom_line()
+qplot(date, T10, data=treasury)
+attach(treasury)
+plot(T10)
+```
+
