@@ -1,27 +1,75 @@
+---
+title: "Time Series Analysis, Assignment 1"
+author: "Yoshiki NAKAJIMA"
+date: "`r format(Sys.Date())`"
+output: github_document
+---
+
+
 ### Problem 6
 First, I import the data directly from FRED using `getSymbols` function of [quantmod](https://cran.r-project.org/web/packages/quantmod/quantmod.pdf)
 
-```{r}
+```{r, message=F, warning=F, results='hide'}
 library(quantmod)
 
 getSymbols('T10Y3MM',src='FRED') # monthly observation from 1982-01-01 to 2018-03-01
 T10Y3MM= T10Y3MM['/2017-12-01'] # select end period
+```
 
+```{r}
 head(T10Y3MM) # show head
 tail(T10Y3MM) # show tail
 ```
 
+(a) Draw a time series plot of the original monthly series {$y_t$}
+
 ```{r}
 plot(T10Y3MM)
+```
+
+(b) Modify the series so that 
+1. $x_\tau=y_{3\tau}$
+2. $x_ \tau = (1/3) \sum_{j=1}^3 y_{3\tau+1-j}$
+3. $x_\tau=y_{12\tau}$
+4. $x_\tau=(1/12)\sum_{j=1}^{12} y_{12\tau+1-j}$
+
+```{r,fig.show='hold', fig.width=8,fig.height=4}
+quat=3*1:(length(T10Y3MM)/3) # 3,6,9,...
+quatStock=T10Y3MM[quat] # Stock aggregate, quartely
+year=12*1:(length(T10Y3MM)/12) # 12,24,...
+yearStock=T10Y3MM[year] # SA, yearly
+plot(quatStock) # type1
+plot(yearStock) # type3
+```
 
 
-T10Y3MM=as.data.frame(T10Y3MM)
-date=rownames(T10Y3MM)
-treasury=data_frame(date,T10=T10Y3MM$T10Y3MM)
-ggplot(treasury, aes(x=date, y=T10))+
-  geom_line()
-qplot(date, T10, data=treasury)
-attach(treasury)
-plot(T10)
+
+```{r}
+# flow aggregate, quartely
+quatFlow=as.xts(ts(NA, start = c(1982,1),end = c(2017,4), frequency=4)) 
+for (i in 1:length(quatFlow)){
+  quatFlow[i]=(T10Y3MM[[3*i]]+T10Y3MM[[3*i-1]]+T10Y3MM[[3*i-2]])/3
+}
+head(quatFlow)
+
+# flow aggregate, yearly
+yearFlow=as.xts(ts(NA, start=1982, end=2017))
+for(i in 1:length(yearFlow)){
+  yearFlow[i]=(T10Y3MM[[12*i]]+T10Y3MM[[12*i-1]]+T10Y3MM[[12*i-2]]+T10Y3MM[[12*i-3]]+T10Y3MM[[12*i-4]]+T10Y3MM[[12*i-5]]+T10Y3MM[[12*i-6]]+T10Y3MM[[12*i-7]]+T10Y3MM[[12*i-8]]+T10Y3MM[[12*i-9]]+T10Y3MM[[12*i-10]]+T10Y3MM[[12*i-11]])/12
+}
+head(yearFlow)
+
+plot(quatFlow) # type2
+plot(yearFlow) # type4
+```
+
+(c) Coompute sample autocorrelation at lags 1,2,3 and 4 for the original series and four aggSeries in b
+
+```{r}
+acf(T10Y3MM, plot = F)[1:4] # original series
+acf(quatStock, plot = F)[1:4] # stock aggegate, quartely
+acf(quatFlow, plot=F)[1:4] # flow aggregate, quately
+acf(yearStock,plot=F)[1:4] # SA, yearly
+acf(yearFlow,plot=F)[1:4] # FA, yearly
 ```
 
