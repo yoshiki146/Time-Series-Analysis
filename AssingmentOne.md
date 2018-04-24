@@ -44,7 +44,7 @@ tail(T10Y3MM) # show tail
 plot(T10Y3MM)
 ```
 
-![](AssingmentOne_files/figure-markdown_github/unnamed-chunk-3-1.png)
+![](AssingmentOne_files/figure-markdown_github/originalSeries-1.png)
 
 1.  Modify the series so that
 
@@ -60,11 +60,7 @@ quat=3*1:(length(T10Y3MM)/3) # 3,6,9,...
 quatStock=T10Y3MM[quat] # Stock aggregate, quartely
 year=12*1:(length(T10Y3MM)/12) # 12,24,...
 yearStock=T10Y3MM[year] # SA, yearly
-plot(quatStock) # type1
-plot(yearStock) # type3
 ```
-
-![](AssingmentOne_files/figure-markdown_github/unnamed-chunk-4-1.png)![](AssingmentOne_files/figure-markdown_github/unnamed-chunk-4-2.png)
 
 ``` r
 # flow aggregate, quartely
@@ -101,16 +97,28 @@ head(yearFlow)
     ## 1987-01-01 2.421667
 
 ``` r
+plot(quatStock) # type1
+```
+
+![](AssingmentOne_files/figure-markdown_github/quatStock-1.png)
+
+``` r
 plot(quatFlow) # type2
 ```
 
-![](AssingmentOne_files/figure-markdown_github/unnamed-chunk-5-1.png)
+![](AssingmentOne_files/figure-markdown_github/quatFlow-1.png)
+
+``` r
+plot(yearStock) # type3
+```
+
+![](AssingmentOne_files/figure-markdown_github/yearStock-1.png)
 
 ``` r
 plot(yearFlow) # type4
 ```
 
-![](AssingmentOne_files/figure-markdown_github/unnamed-chunk-5-2.png)
+![](AssingmentOne_files/figure-markdown_github/yearFlow-1.png)
 
 1.  Coompute sample autocorrelation at lags 1,2,3 and 4 for the original series and four aggSeries in b
 
@@ -163,3 +171,5 @@ acf(yearFlow,plot=F)[1:4] # FA, yearly
     ## 
     ##      1      2      3      4 
     ##  0.533 -0.041 -0.407 -0.461
+
+1.  The results suggest that autocorrelation is biggest for the original monthly data and the persistence decreases when data is aggregated. Also, when I compare stock aggregate and flow aggregate in the quartely data, persistence is higher in stock aggregate, which is consistent with the finding in Problem 1 and 2.

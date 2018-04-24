@@ -2,7 +2,7 @@
 title: "Time Series Analysis, Assignment 1"
 author: "Yoshiki NAKAJIMA"
 date: "`r format(Sys.Date())`"
-output: github_document
+output: pdf_document
 ---
 
 
@@ -23,7 +23,7 @@ tail(T10Y3MM) # show tail
 
 (a) Draw a time series plot of the original monthly series {$y_t$}
 
-```{r}
+```{r originalSeries, fig.height=2.5, fig.width=5}
 plot(T10Y3MM)
 ```
 
@@ -33,15 +33,12 @@ plot(T10Y3MM)
 3. $x_\tau=y_{12\tau}$
 4. $x_\tau=(1/12)\sum_{j=1}^{12} y_{12\tau+1-j}$
 
-```{r,fig.show='hold', fig.width=8,fig.height=4}
+```{r}
 quat=3*1:(length(T10Y3MM)/3) # 3,6,9,...
 quatStock=T10Y3MM[quat] # Stock aggregate, quartely
 year=12*1:(length(T10Y3MM)/12) # 12,24,...
 yearStock=T10Y3MM[year] # SA, yearly
-plot(quatStock) # type1
-plot(yearStock) # type3
 ```
-
 
 
 ```{r}
@@ -58,8 +55,21 @@ for(i in 1:length(yearFlow)){
   yearFlow[i]=(T10Y3MM[[12*i]]+T10Y3MM[[12*i-1]]+T10Y3MM[[12*i-2]]+T10Y3MM[[12*i-3]]+T10Y3MM[[12*i-4]]+T10Y3MM[[12*i-5]]+T10Y3MM[[12*i-6]]+T10Y3MM[[12*i-7]]+T10Y3MM[[12*i-8]]+T10Y3MM[[12*i-9]]+T10Y3MM[[12*i-10]]+T10Y3MM[[12*i-11]])/12
 }
 head(yearFlow)
+```
 
+```{r quatStock, fig.width=5,fig.height=2.5}
+plot(quatStock) # type1
+```
+
+```{r quatFlow, fig.width=5,fig.height=2.5}
 plot(quatFlow) # type2
+```
+
+```{r yearStock, fig.width=5,fig.height=2.5}
+plot(yearStock) # type3
+```
+
+```{r yearFlow, fig.width=5,fig.height=2.5}
 plot(yearFlow) # type4
 ```
 
@@ -73,3 +83,5 @@ acf(yearStock,plot=F)[1:4] # SA, yearly
 acf(yearFlow,plot=F)[1:4] # FA, yearly
 ```
 
+(d)
+The results suggest that autocorrelation is biggest for the original monthly data and the persistence decreases when data is aggregated. Also, when I compare stock aggregate and flow aggregate in the quartely data, persistence is higher in stock aggregate, which is consistent with the finding in Problem 1 and 2. 
