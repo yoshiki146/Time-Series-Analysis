@@ -1,0 +1,170 @@
+---
+output:
+  pdf_document
+---
+### Prob-3
+In this problem we consider some numerical examples of Problem-2. Recall
+Eqs. (1) and (2), and assume that $\kappa_v =3, \phi \in \{0.3, 0.6, 0.9 \},$ and $\sigma_\xi^2 \in \{0.3, 0.9, 1.8 \}$
+(a) For each pair of ($\phi, \sigma_\xi^2$) compute $Corr[y_t^2, y_{t-h}^2]$ with $h=1 ,2 , 3, 4$ (i.e. fill out Table 1)  
+
+First, I create a placeholder matrix
+```{r setup_sv}
+h4=c('h=1', 'h=2', 'h=3', 'h=4') # column names
+phi_sigmaSq=c('(0.3, 0.3)', '(0.6, 0.3)', '(0.9, 0.3)',  # rownames
+              '(0.3, 0.9)', '(0.6, 0.9)', '(0.9, 0.9)',
+              '(0.3, 1.8)', '(0.6, 1.8)', '(0.9, 1.8)')
+Table1=matrix(NA, 9,4,dimnames = list(phi_sigma=phi_sigmaSq,h4))
+```
+
+Then I define a helper function for correlation computed as 
+\begin{align*}
+\operatorname{Corr} \left[ y _ { t } ^ { 2} ,y _ { t - h } ^ { 2} \right] \equiv \frac { \operatorname{Cov} \left[ y _ { t } ^ { 2} ,y _ { t - h } ^ { 2} \right] } { \operatorname{Var} \left[ y _ { t } ^ { 2} \right] } = \frac { \exp \left[ \frac { \sigma _ { \xi } ^ { 2} } { 1- \phi ^ { 2} } \times \phi ^ { h } \right] - 1} { \kappa _ { \nu } \times \exp \left[ \frac { \sigma _ { \xi } ^ { 2} } { 1- \phi ^ { 2} } \right] - 1}
+\end{align*}
+Notice this is a fuction of $\kappa, \phi, \sigma_\xi^2$ and $h$
+
+```{r defineCorr}
+corr= function(sigmaSq, phi, h, kappa){
+  num = exp(sigmaSq*(phi^h)/(1-phi^2))-1 #numerator
+  denom =  kappa* (exp(sigmaSq/(1-phi^2))) -1 #denominator
+  corr= num/denom
+  return(corr)
+}
+```
+  
+Now we can plug $\kappa, \phi, \sigma_\xi^2$ and $h$ to the function defined above and fill out Table1. 
+```{r svTable}
+kappa=3
+sigmaSq_option=c(0.3,0.9,1.8)
+phi_option=c(0.3,0.6,0.9)
+
+for (i in 1:3){
+  sigmaSq=sigmaSq_option[i]
+  for(j in 1:3){
+    phi=phi_option[j]
+    for(h in 1:4){
+      Corr=corr(sigmaSq, phi, h, kappa)
+      Table1[(3*(i-1)+j),h]=Corr
+    }
+  }
+}
+knitr::kable(Table1,digits = 5)
+```
+
+
+
+(b) Comment on Table 1 from a viewpoint of volatility persistence  
+* Larger $\phi$ leads to higher persistence (Recall $\log \sigma _ { t } ^ { 2} = \mu + \phi \left( \log \sigma _ { t - 1} ^ { 2} - \mu \right) + \xi _ { t }$)
+* The level of correlation is small even when $\phi$ is large (e.g $\phi=0.9$) and decreases relatively fast  
+
+
+(c) For comparison, consider a GARCH(1,1) process:  
+
+\begin{align*} 
+  { y _ { t } = \sigma _ { t } \nu _ { t } ,\quad \nu _ { t } \stackrel { i .d .d } { \sim } N ( 0,1) } \\
+  { \sigma _ { t } ^ { 2} = \omega + \alpha y _ { t - 1} ^ { 2} + \beta \sigma _ { t - 1} ^ { 2} } \\ 
+  { \omega > 0,\: \alpha \geq 0,\: \beta \geq 0,\: \alpha + \beta < 1} 
+\end{align*}
+
+
+Define 
+\begin{align}
+  \delta ( \alpha ,\beta ) = 3\alpha ^ { 2} + \beta ^ { 2} + 2\alpha \beta \tag{*}
+\end{align}
+
+
+
+As we learned in class, if $\delta ( \alpha ,\beta ) < 1,$then $\operatorname{Corr} \left[ y _ { t } ^ { 2} ,y _ { t - h } ^ { 2} \right]$ is well defined and given by
+\begin{align}
+  \operatorname{Corr} \left[ y _ { t } ^ { 2} ,y _ { t - h } ^ { 2} \right] = \frac { \alpha [ 1- \beta ( \alpha + \beta ) ] } { 1- 2\alpha \beta - \beta ^ { 2} } ( \alpha + \beta ) ^ { h - 1} ,\quad h \geq 1 \tag{**}
+\end{align}
+
+
+First, I create a placeholder matrix and helper function as I did in (a)
+```{r setup_garch}
+alpha_beta= c('(0.2, 0.5)', '(0.4, 0.1)', '(0.21, 0.71)', '(0.3, 0.6)','(0.5, 0.2)') 
+Table2= matrix(NA, 5,5,dimnames = list(alpha_beta=alpha_beta, c('delta', h4))) # placeholder
+
+delta= function(alpha, beta){ # helper function for (*)
+  return(3*(alpha^2)+ beta^2 + 2*alpha*beta)
+}
+
+Corr_garch= function(alpha, beta, h){ # helper function for (**)
+  return((alpha*(1-(beta*(alpha+beta)))/(1-2*alpha*beta-beta^2))*((alpha+beta)^(h-1)))
+}
+```
+
+Then plug $(\alpha, \beta) = (0.2, 0.5), (0.4, 0.1), (0.21, 0.71), (0.3, 0.6)$ and $(0.5, 0.2)$ and we get Table 2
+```{r garchTable}
+alpha_option=c(0.2,0.4,0.21,0.3,0.5)
+beta_option= c(0.5, 0.1,0.71,0.6,0.2)
+
+for (i in 1:5){
+  alpha=alpha_option[i]
+  beta= beta_option[i]
+  
+  Table2[i, 1]= delta(alpha, beta)
+  
+  for (h in 1:4){
+    corr_i = Corr_garch(alpha, beta, h)
+    Table2[i, h+1]= corr_i
+  }
+}
+knitr::kable(Table2, digits = 4)
+```
+
+(d) Compare the volatility persistence of SV and GARCH based on Tables 1 and 2
+* learger value of $\alpha$ and $\beta$ result in higher persistence in GARCH
+* When $\alpha + \beta$ is large, GARCH model shows high correlation and it doesn't decrease much as h increases
+* Overall, persistence is higher in GARCH than in SV
+
+
+### Prob-4
+In this problem we study empirical examples related with Problem-3. See [Federal Reserve Economic Data](https://fred.stlouisfed.org/)  
+Download daily S&P 500 Index (not seasonally adjusted) from July 16, 2012 through July
+14, 2014 (501 observations). Call it $\{x_t\}$.
+
+
+We first import data directly from FRED using `getSymbol` function in `quantmod` library, select the time period and remove missing values
+```{r fetch_data, warning=F, message=F, results='hide'}
+library(quantmod)
+getSymbols('SP500', src = 'FRED', auto.assign = T)
+SP500= SP500['2012-07-16/2014-07-14']
+SP500= SP500[!is.na(SP500)]
+```
+
+Then I add two variables, log-return and squared log-return to the dataframe. Log-return is calculated in percentage to avoid very small values. I show first six observations to make sure that transformation is correct.
+```{r calculate_log}
+SP500$log_return = round((log(SP500$SP500)-lag(log(SP500$SP500)))*100, 2) # per cent, two digits
+SP500$log_return_sq = SP500$log_return^2
+head(SP500)
+```
+
+(a) Draw a time series plot of the log-return series $y_{t} = \log x _t - \log x _{t - 1}$
+```{r log_return_plot,fig.height=2.5, fig.width=5}
+plot.xts(SP500$log_return)
+```
+
+```{r log_return_sq_plot,fig.height=2.5, fig.width=5}
+plot.xts(SP500$log_return_sq)
+```
+
+
+(c) Compute sample autocorrelation of $ \{y_t^2\} $ at lags 1-4, denoted by $\{ \hat{\rho }_{ y^{2} ,1} , \hat{\rho}_{y^2 ,2} ,\hat { \rho } _ { y ^2 ,3} ,\hat { \rho } _ { y ^2 ,4} \}$
+
+Recall that $Var[y_t]= (1/T)E[\sum_{t=1}^T(y_t-E[y_t])^2], Cov[y_t, y_{t-h}]=(1/T)E[\sum_{t=1}^T(y_t-E[y_t])(y_{t-h}-E[y_{t-h}])]$ and $Corr[y_t, y_{t-h}] = Cov[y_t, y_{t-h}]$. Therefore sample correlation for $h=1,2,3,4$ are:
+```{r autocorr}
+corr=numeric(4)
+cov=numeric(4)
+
+mean=mean(SP500$log_return_sq, na.rm=T)
+var=mean((SP500$log_return_sq-mean)^2, na.rm=T)
+for (h in 1:4){
+  cov[h]=mean((SP500$log_return_sq-mean)*(lag(SP500$log_return_sq, k=h) - mean), na.rm=T)
+}
+corr=cov/var
+corr
+```
+
+(d) In view of Tables 1 and 2, which do you think is a better fit for $\{ \hat{\rho }_{ y^{2} ,1} , \hat{\rho}_{y^2 ,2} ,\hat { \rho } _ { y ^2 ,3} ,\hat { \rho } _ { y ^2 ,4} \}$: SV or GARCH?  
+
+From the result of (c), we can say that $\{y_t\}$ has relatively high persistence. Recall that GARCH model better fits the series with high persistence, as we have seen in Prob3-(d). Therefore, GARCH model is the better model for our SP500 series.
