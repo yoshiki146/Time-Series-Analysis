@@ -1,10 +1,7 @@
 ---
-title: "Time Series Analysis, Assignment 1"
-author: "Yoshiki NAKAJIMA"
-date: "`r format(Sys.Date())`"
-output: github_document
+output:
+  github_document
 ---
-
 
 ### Problem 6
 First, I import the data directly from FRED using `getSymbols` function of [quantmod](https://cran.r-project.org/web/packages/quantmod/quantmod.pdf)

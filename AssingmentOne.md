@@ -1,7 +1,3 @@
-Time Series Analysis, Assignment 1
-================
-Yoshiki NAKAJIMA
-2018-04-23
 
 ### Problem 6
 
