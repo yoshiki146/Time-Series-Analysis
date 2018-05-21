@@ -1,14 +1,15 @@
 ---
 output:
-  pdf_document
+  github_document
 ---
 ### Prob-3
 In this problem we consider some numerical examples of Problem-2. Recall
-Eqs. (1) and (2), and assume that $\kappa_v =3, \phi \in \{0.3, 0.6, 0.9 \},$ and $\sigma_\xi^2 \in \{0.3, 0.9, 1.8 \}$
+Eqs. (1) and (2), and assume that $\kappa_v =3, \phi \in \{0.3, 0.6, 0.9 \},$ and $\sigma_\xi^2 \in \{0.3, 0.9, 1.8 \}$  
 (a) For each pair of ($\phi, \sigma_\xi^2$) compute $Corr[y_t^2, y_{t-h}^2]$ with $h=1 ,2 , 3, 4$ (i.e. fill out Table 1)  
 
 First, I create a placeholder matrix
 ```{r setup_sv}
+# set-up
 h4=c('h=1', 'h=2', 'h=3', 'h=4') # column names
 phi_sigmaSq=c('(0.3, 0.3)', '(0.6, 0.3)', '(0.9, 0.3)',  # rownames
               '(0.3, 0.9)', '(0.6, 0.9)', '(0.9, 0.9)',
@@ -23,12 +24,12 @@ Then I define a helper function for correlation computed as
 Notice this is a fuction of $\kappa, \phi, \sigma_\xi^2$ and $h$
 
 ```{r defineCorr}
+# helper function
 corr= function(sigmaSq, phi, h, kappa){
   num = exp(sigmaSq*(phi^h)/(1-phi^2))-1 #numerator
   denom =  kappa* (exp(sigmaSq/(1-phi^2))) -1 #denominator
   corr= num/denom
-  return(corr)
-}
+  return(corr)}
 ```
   
 Now we can plug $\kappa, \phi, \sigma_\xi^2$ and $h$ to the function defined above and fill out Table1. 
@@ -43,10 +44,7 @@ for (i in 1:3){
     phi=phi_option[j]
     for(h in 1:4){
       Corr=corr(sigmaSq, phi, h, kappa)
-      Table1[(3*(i-1)+j),h]=Corr
-    }
-  }
-}
+      Table1[(3*(i-1)+j),h]=Corr}}}
 knitr::kable(Table1,digits = 5)
 ```
 
@@ -54,7 +52,7 @@ knitr::kable(Table1,digits = 5)
 
 (b) Comment on Table 1 from a viewpoint of volatility persistence  
 * Larger $\phi$ leads to higher persistence (Recall $\log \sigma _ { t } ^ { 2} = \mu + \phi \left( \log \sigma _ { t - 1} ^ { 2} - \mu \right) + \xi _ { t }$)
-* The level of correlation is small even when $\phi$ is large (e.g $\phi=0.9$) and decreases relatively fast  
+* The level of correlation is relatively small even when $\phi$ is large (e.g $\phi=0.9$) and decreases relatively fast  
 
 
 (c) For comparison, consider a GARCH(1,1) process:  
@@ -81,16 +79,16 @@ As we learned in class, if $\delta ( \alpha ,\beta ) < 1,$then $\operatorname{Co
 
 First, I create a placeholder matrix and helper function as I did in (a)
 ```{r setup_garch}
+# GARCH setup
 alpha_beta= c('(0.2, 0.5)', '(0.4, 0.1)', '(0.21, 0.71)', '(0.3, 0.6)','(0.5, 0.2)') 
 Table2= matrix(NA, 5,5,dimnames = list(alpha_beta=alpha_beta, c('delta', h4))) # placeholder
 
 delta= function(alpha, beta){ # helper function for (*)
-  return(3*(alpha^2)+ beta^2 + 2*alpha*beta)
-}
+  return(3*(alpha^2)+ beta^2 + 2*alpha*beta)}
 
+# GARCH funciton
 Corr_garch= function(alpha, beta, h){ # helper function for (**)
-  return((alpha*(1-(beta*(alpha+beta)))/(1-2*alpha*beta-beta^2))*((alpha+beta)^(h-1)))
-}
+  return((alpha*(1-(beta*(alpha+beta)))/(1-2*alpha*beta-beta^2))*((alpha+beta)^(h-1)))}
 ```
 
 Then plug $(\alpha, \beta) = (0.2, 0.5), (0.4, 0.1), (0.21, 0.71), (0.3, 0.6)$ and $(0.5, 0.2)$ and we get Table 2
@@ -126,8 +124,8 @@ Download daily S&P 500 Index (not seasonally adjusted) from July 16, 2012 throug
 
 We first import data directly from FRED using `getSymbol` function in `quantmod` library, select the time period and remove missing values
 ```{r fetch_data, warning=F, message=F, results='hide'}
-library(quantmod)
-getSymbols('SP500', src = 'FRED', auto.assign = T)
+# Import data
+quantmod::getSymbols('SP500', src = 'FRED', auto.assign = T)
 SP500= SP500['2012-07-16/2014-07-14']
 SP500= SP500[!is.na(SP500)]
 ```
@@ -141,19 +139,19 @@ head(SP500)
 
 (a) Draw a time series plot of the log-return series $y_{t} = \log x _t - \log x _{t - 1}$
 ```{r log_return_plot,fig.height=2.5, fig.width=5}
-plot.xts(SP500$log_return)
+xts::plot.xts(SP500$log_return)
 ```
 
 ```{r log_return_sq_plot,fig.height=2.5, fig.width=5}
-plot.xts(SP500$log_return_sq)
+xts::plot.xts(SP500$log_return_sq)
 ```
 
 
-(c) Compute sample autocorrelation of $ \{y_t^2\} $ at lags 1-4, denoted by $\{ \hat{\rho }_{ y^{2} ,1} , \hat{\rho}_{y^2 ,2} ,\hat { \rho } _ { y ^2 ,3} ,\hat { \rho } _ { y ^2 ,4} \}$
+(c) Compute sample autocorrelation of $\{y_t^2 \}$ at lags 1-4, denoted by $\{ \hat{\rho }_{ y^{2} ,1} , \hat{\rho}_{y^2 ,2} ,\hat { \rho } _ { y ^2 ,3} ,\hat { \rho } _ { y ^2 ,4} \}$
 
 Recall that $Var[y_t]= (1/T)E[\sum_{t=1}^T(y_t-E[y_t])^2], Cov[y_t, y_{t-h}]=(1/T)E[\sum_{t=1}^T(y_t-E[y_t])(y_{t-h}-E[y_{t-h}])]$ and $Corr[y_t, y_{t-h}] = Cov[y_t, y_{t-h}]$. Therefore sample correlation for $h=1,2,3,4$ are:
 ```{r autocorr}
-corr=numeric(4)
+corr=numeric(4) # empty vector
 cov=numeric(4)
 
 mean=mean(SP500$log_return_sq, na.rm=T)
